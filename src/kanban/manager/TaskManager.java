@@ -140,7 +140,7 @@ public class TaskManager {
 
     public void removeEpic(int id) {
         Epic epic = epics.get(id);
-        if (epic == null){
+        if (epic == null) {
             return;
         }
         ArrayList<Integer> listIdSubtask = epic.getSubtaskId();
@@ -152,7 +152,7 @@ public class TaskManager {
 
     public void removeSubtask(int id) {
         Subtask subtask = subtasks.get(id);
-        if (subtask == null){
+        if (subtask == null) {
             return;
         }
         Epic epic = epics.get(subtask.getEpicId());
@@ -167,14 +167,14 @@ public class TaskManager {
         tasks.clear();
     }
 
-    public void deleteAllEpic(){
+    public void deleteAllEpic() {
         epics.clear();
         subtasks.clear();
     }
 
-    public void deleteAllSubtask(){
+    public void deleteAllSubtask() {
         subtasks.clear();
-        for (Epic epic: epics.values()){
+        for (Epic epic : epics.values()) {
             epic.getSubtaskId().clear();
         }
     }

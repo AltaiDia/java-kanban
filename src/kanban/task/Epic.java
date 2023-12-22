@@ -1,7 +1,6 @@
 package kanban.task;
 
 
-
 import java.util.ArrayList;
 import java.util.Objects;
 
