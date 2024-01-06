@@ -8,12 +8,13 @@ import kanban.task.Task;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
     HistoryManager historyManager = Manager.getDefaultHistory();
-    private HashMap<Integer, Task> tasks = new HashMap<>();
-    private HashMap<Integer, Epic> epics = new HashMap<>();
-    private HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    private Map<Integer, Task> tasks = new HashMap<>();
+    private Map<Integer, Epic> epics = new HashMap<>();
+    private Map<Integer, Subtask> subtasks = new HashMap<>();
     private List<Task> historyList = historyManager.getHistory();
     private int nexId;
 
@@ -100,7 +101,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     private void updateEpicStatus(int epicId) {
         Epic epic = epics.get(epicId);
-        ArrayList<Integer> subtaskId = epic.getSubtaskId();
+        List<Integer> subtaskId = epic.getSubtaskId();
         if (subtaskId.isEmpty()) {
             epic.setStatus(Status.NEW);
             return;
@@ -130,20 +131,23 @@ public class InMemoryTaskManager implements TaskManager {
     // Получение по Id
     @Override
     public Task getTask(int id) {
-        historyManager.add(tasks.get(id));
-        return tasks.get(id);
+        final Task task = tasks.get(id);
+        historyManager.add(task);
+        return task;
     }
 
     @Override
     public Epic getEpic(int id) {
-        historyManager.add(epics.get(id));
-        return epics.get(id);
+        final Epic epic = epics.get(id);
+        historyManager.add(epic);
+        return epic;
     }
 
     @Override
     public Subtask getSubtask(int id) {
-        historyManager.add(subtasks.get(id));
-        return subtasks.get(id);
+        final Subtask subtask =subtasks.get(id);
+        historyManager.add(subtask);
+        return subtask;
     }
 
     //Получение списка просмотренных задач
@@ -168,7 +172,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (epic == null) {
             return;
         }
-        ArrayList<Integer> listIdSubtask = epic.getSubtaskId();
+        List<Integer> listIdSubtask = epic.getSubtaskId();
         for (Integer idSub : listIdSubtask) {
             subtasks.remove(idSub);
         }
@@ -209,24 +213,24 @@ public class InMemoryTaskManager implements TaskManager {
 
     //Получение списков: Задач/Эпиков/Подзадач
     @Override
-    public ArrayList<Task> getTasks() {
+    public List<Task> getTasks() {
         return new ArrayList<>(tasks.values());
     }
 
     @Override
-    public ArrayList<Epic> getEpics() {
+    public List<Epic> getEpics() {
         return new ArrayList<>(epics.values());
     }
 
     @Override
-    public ArrayList<Subtask> getSubtasks() {
+    public List<Subtask> getSubtasks() {
         return new ArrayList<>(subtasks.values());
     }
 
     //Дополнительный метод на получение списка определенного эпика
     @Override
-    public ArrayList<Subtask> getSubtasksEpic(Epic newEpic) {
-        ArrayList<Subtask> listSubtaskEpic = new ArrayList<>();
+    public List<Subtask> getSubtasksEpic(Epic newEpic) {
+        List<Subtask> listSubtaskEpic = new ArrayList<>();
         for (Integer id : newEpic.getSubtaskId()) {
             listSubtaskEpic.add(subtasks.get(id));
         }

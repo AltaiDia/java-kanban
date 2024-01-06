@@ -2,10 +2,11 @@ package kanban.task;
 
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class Epic extends Task {
-    private ArrayList<Integer> subtaskId;
+    private List<Integer> subtaskId;
 
     public Epic(String title, String description, Status status) {
         super(title, description, status);
@@ -37,7 +38,7 @@ public class Epic extends Task {
                 '}';
     }
 
-    public ArrayList<Integer> getSubtaskId() {
+    public List<Integer> getSubtaskId() {
         return subtaskId;
     }
 

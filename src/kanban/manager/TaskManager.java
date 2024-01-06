@@ -46,14 +46,14 @@ public interface TaskManager {
     void deleteAllSubtask();
 
     //Получение списков: Задач/Эпиков/Подзадач
-    ArrayList<Task> getTasks();
+    List<Task> getTasks();
 
-    ArrayList<Epic> getEpics();
+    List<Epic> getEpics();
 
-    ArrayList<Subtask> getSubtasks();
+    List<Subtask> getSubtasks();
 
     //Дополнительный метод на получение списка определенного эпика
-    ArrayList<Subtask> getSubtasksEpic(Epic newEpic);
+    List<Subtask> getSubtasksEpic(Epic newEpic);
 
     //Получение списка просмотренных задач
     List<Task> getHistory();
