@@ -7,6 +7,8 @@ import kanban.task.Status;
 import kanban.task.Subtask;
 import kanban.task.Task;
 
+import java.util.List;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -31,34 +33,8 @@ public class Main {
         Subtask subtask21 = new Subtask("Интернет", "Оплатить интернет", Status.NEW, epic2.getId());
         manager.createSubtask(subtask21);
 
+        printAllTasks(manager);
 
-        System.out.println(manager.getTask(task1.getId())+ "\n");
-
-        System.out.println(manager.getTask(task2.getId())+ "\n");
-        System.out.println(manager.getEpic(epic1.getId()));
-        System.out.println(manager.getEpic(epic2.getId()));
-
-
-        System.out.println(manager.getSubtask(subtask11.getId()));
-        System.out.println(manager.getSubtask(subtask12.getId()));
-        System.out.println(manager.getSubtask(subtask21.getId()));
-
-        System.out.println(manager.getEpic(epic1.getId()));
-        System.out.println(manager.getEpic(epic2.getId()));
-        System.out.println(manager.getTask(task2.getId()));
-
-        System.out.println(manager.getEpic(epic1.getId())+ "\n");
-
-        System.out.println(manager.getHistory());
-
-
-        /*//Печать списков
-        System.out.println("Печать списка всех простых задач");
-        System.out.println(manager.getTasks());
-        System.out.println("Печать списка всех Эпиков");
-        System.out.println(manager.getEpics());
-        System.out.println("Печать списка всех подзадач");
-        System.out.println(manager.getSubtasks());
 
         //меняю статусы
         task1.setStatus(Status.DONE);
@@ -79,21 +55,40 @@ public class Main {
         epic2.setDescription("Оправить работу");
         manager.updateEpic(epic2);
 
-        System.out.println("Печать списка всех простых задач");
-        System.out.println(manager.getTasks());
-        System.out.println("Печать списка всех Эпиков");
-        for (Epic epic : manager.getEpics()) {
-            System.out.println(epic);
-            System.out.println("Печать списка подзадач");
-            System.out.println(manager.getSubtasksEpic(epic));
-        }
+        printAllTasks(manager);
 
         //Удаляю одну задачу и один из эпиков
         manager.removeTask(task1.getId());
         manager.removeEpic(epic1.getId());
-
+        printAllTasks(manager);
         //Удаляю все
         manager.deleteAllEpic();
-        System.out.println(manager.getSubtasks());*/
+        System.out.println(manager.getSubtasks());
+        printAllTasks(manager);
+
+    }
+
+    private static void printAllTasks(TaskManager manager) {
+        System.out.println("Задачи:");
+        for (Task task : manager.getTasks()) {
+            System.out.println(task);
+        }
+        System.out.println("Эпики:");
+        for (Epic epic : manager.getEpics()) {
+            System.out.println(epic);
+
+            for (Task task : manager.getSubtasksEpic(epic)) {
+                System.out.println("--> " + task);
+            }
+        }
+        System.out.println("Подзадачи:");
+        for (Task subtask : manager.getSubtasks()) {
+            System.out.println(subtask);
+        }
+
+        System.out.println("История:");
+        for (Task task : manager.getHistory()) {
+            System.out.println(task);
+        }
     }
 }

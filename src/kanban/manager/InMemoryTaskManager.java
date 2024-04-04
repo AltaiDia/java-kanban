@@ -95,6 +95,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
         saveEpic.setTitle(epic.getTitle());
         saveEpic.setDescription(epic.getDescription());
+        epics.put(saveEpic.getId(),saveEpic);
     }
 
     //обновление статуса эпика
@@ -189,6 +190,7 @@ public class InMemoryTaskManager implements TaskManager {
 
         epic.getSubtaskId().remove(id);
         subtasks.remove(id);
+        epics.put(epic.getId(),epic);
         updateEpicStatus(epic.getId());
     }
 
