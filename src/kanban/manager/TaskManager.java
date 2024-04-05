@@ -3,9 +3,6 @@ package kanban.manager;
 import kanban.task.Epic;
 import kanban.task.Subtask;
 import kanban.task.Task;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public interface TaskManager {

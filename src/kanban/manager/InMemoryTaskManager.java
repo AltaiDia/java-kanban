@@ -12,10 +12,9 @@ import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
     HistoryManager historyManager = Manager.getDefaultHistory();
-    private Map<Integer, Task> tasks = new HashMap<>();
-    private Map<Integer, Epic> epics = new HashMap<>();
-    private Map<Integer, Subtask> subtasks = new HashMap<>();
-    private List<Task> historyList = historyManager.getHistory();
+    private final Map<Integer, Task> tasks = new HashMap<>();
+    private final Map<Integer, Epic> epics = new HashMap<>();
+    private final Map<Integer, Subtask> subtasks = new HashMap<>();
     private int nexId;
 
     public InMemoryTaskManager() {
@@ -154,7 +153,7 @@ public class InMemoryTaskManager implements TaskManager {
     //Получение списка просмотренных задач
     @Override
     public List<Task> getHistory() {
-        return historyList;
+        return historyManager.getHistory();
     }
 
     //Удаление по Id
