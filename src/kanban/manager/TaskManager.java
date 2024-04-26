@@ -3,6 +3,7 @@ package kanban.manager;
 import kanban.task.Epic;
 import kanban.task.Subtask;
 import kanban.task.Task;
+
 import java.util.List;
 
 public interface TaskManager {
@@ -41,6 +42,8 @@ public interface TaskManager {
     void deleteAllEpic();
 
     void deleteAllSubtask();
+
+    void clearAll();
 
     //Получение списков: Задач/Эпиков/Подзадач
     List<Task> getTasks();
