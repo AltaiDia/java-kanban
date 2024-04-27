@@ -7,8 +7,6 @@ import kanban.task.Status;
 import kanban.task.Subtask;
 import kanban.task.Task;
 
-import java.util.List;
-
 public class Main {
 
     public static void main(String[] args) {
@@ -33,6 +31,7 @@ public class Main {
         Subtask subtask21 = new Subtask("Интернет", "Оплатить интернет", Status.NEW, epic2.getId());
         manager.createSubtask(subtask21);
 
+        manager.getTask(task1.getId());
         printAllTasks(manager);
 
 
@@ -87,8 +86,12 @@ public class Main {
         }
 
         System.out.println("История:");
-        for (Task task : manager.getHistory()) {
-            System.out.println(task);
+        if (manager.getHistory().isEmpty()) {
+            System.out.println("Список просмотров пуст");
+        } else {
+            for (Task task : manager.getHistory()) {
+                System.out.println(task);
+            }
         }
     }
 }

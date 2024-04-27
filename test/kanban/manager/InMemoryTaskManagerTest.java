@@ -7,16 +7,17 @@ import kanban.task.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class InMemoryTaskManagerTest {
-    private TaskManager manager = Manager.getDefault();
+    private final TaskManager manager = Manager.getDefault();
 
     @BeforeEach
-    public void beforeAll() {
-        manager.deleteAllTask();
+    public void BeforeEach() {
+        manager.clearAll();
     }
 
     @Test
@@ -66,7 +67,8 @@ class InMemoryTaskManagerTest {
         Epic epic = new Epic("Тестовая новая большая задача", "Описание большой задачи", Status.NEW);
         manager.createEpic(epic);
 
-        Subtask subtask = new Subtask("Тестовая новая подзадача", "Описание подзадачи", Status.NEW, epic.getId());
+        Subtask subtask = new Subtask("Тестовая новая подзадача",
+                "Описание подзадачи", Status.NEW, epic.getId());
         manager.createSubtask(subtask);
 
         final int saveSubtaskId = subtask.getId();
@@ -81,7 +83,30 @@ class InMemoryTaskManagerTest {
         assertNotNull(subtasks, "Подзадачи не возвращаются.");
         assertEquals(1, subtasks.size(), "Неверное количество Подзадач.");
         assertEquals(subtask, subtasks.get(0), "Подзадачи не совпадают.");
+    }
 
+    @Test
+    public void removeSubtask() {
+        Epic epic = new Epic("Тестовая новая большая задача", "Описание большой задачи", Status.NEW);
+        manager.createEpic(epic);
+        List<Integer> expectedSubTaskList = new ArrayList<>();
 
+        Subtask subtask1 = new Subtask("Тестовая новая подзадача № 1",
+                "Описание подзадачи № 1", Status.NEW, epic.getId());
+        manager.createSubtask(subtask1);
+        Subtask subtask2 = new Subtask("Тестовая новая подзадача № 2",
+                "Описание подзадачи № 2", Status.NEW, epic.getId());
+        manager.createSubtask(subtask2);
+        Subtask subtask3 = new Subtask("Тестовая новая подзадача № 2",
+                "Описание подзадачи № 2", Status.NEW, epic.getId());
+        manager.createSubtask(subtask3);
+
+        expectedSubTaskList.add(subtask1.getId());
+        expectedSubTaskList.add(subtask3.getId());
+
+        manager.removeSubtask(subtask2.getId());
+
+        assertArrayEquals(new List[]{expectedSubTaskList}, new List[]{epic.getSubtaskId()},
+                "Внутри Epic остается не актуальный id SubTask");
     }
 }
