@@ -1,9 +1,6 @@
 package kanban.manager;
 
-import kanban.task.Epic;
-import kanban.task.Status;
-import kanban.task.Subtask;
-import kanban.task.Task;
+import kanban.task.*;
 
 import java.util.*;
 
@@ -19,41 +16,79 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /*
-     * Получение из вне, присваивание Id и запись в HashMap
+     * Получение из вне или создание новой задачи, с последующим сохранением в HashMap
      */
     @Override
     public int createTask(Task task) {
-        int taskId = nexId++;
-        task.setId(taskId);
-        tasks.put(taskId, task);
+        int taskId;
+
+        if (task.getId() == -1) {
+            taskId = nexId++;
+            task.setId(taskId);
+            task.setTaskType(TaskType.TASK);
+            tasks.put(taskId, task);
+        } else {
+            taskId = task.getId();
+            if (taskId > nexId) {
+                nexId = task.getId() + 1;
+            }
+
+            tasks.put(task.getId(), task);
+        }
         return taskId;
     }
 
     @Override
     public int createEpic(Epic epic) {
-        int epicId = nexId++;
-        epic.setId(epicId);
-        epics.put(epicId, epic);
+        int epicId;
+
+        if (epic.getId() == -1) {
+            epicId = nexId++;
+            epic.setId(epicId);
+            epic.setTaskType(TaskType.EPIC);
+            epics.put(epicId, epic);
+        } else {
+            epicId = epic.getId();
+            if (epicId > nexId) {
+                nexId = epicId + 1;
+            }
+
+            epics.put(epic.getId(), epic);
+        }
         return epicId;
     }
 
     @Override
     public Integer createSubtask(Subtask subtask) {
-        if (epics.containsKey(subtask.getEpicId())) {
-            int subtaskId = nexId++;
-            subtask.setId(subtaskId);
-            subtasks.put(subtaskId, subtask);
+        int subtaskId;
+        if (subtask.getId() == -1) {
+            if (epics.containsKey(subtask.getEpicId())) {
+                subtaskId = nexId++;
+                subtask.setId(subtaskId);
+                subtask.setTaskType(TaskType.SUBTASK);
+                subtasks.put(subtaskId, subtask);
 
+                Epic newEpic = epics.get(subtask.getEpicId());
+
+                newEpic.setSubtaskId(subtaskId);
+                updateEpicStatus(newEpic.getId());
+            } else {
+                System.out.println("Ошибка! Создание подзадчи без Большой задачи");
+                return null;
+            }
+        } else {
+            subtaskId = subtask.getId();
+            if(subtaskId>nexId){
+                nexId = subtaskId + 1;
+            }
+
+            subtasks.put(subtaskId,subtask);
             Epic newEpic = epics.get(subtask.getEpicId());
 
             newEpic.setSubtaskId(subtaskId);
             updateEpicStatus(newEpic.getId());
-            return subtaskId;
-        } else {
-            System.out.println("Ошибка! Создание подзадчи без Большой задачи");
-            return null;
         }
-
+        return subtaskId;
     }
 
     /*

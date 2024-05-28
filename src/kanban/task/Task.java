@@ -7,6 +7,7 @@ public class Task {
     protected String description;
     protected int id = -1;
     protected Status status;
+    protected TaskType taskType = null;
 
     public Task(String title, String description, Status status) {
         this.title = title;
@@ -33,7 +34,8 @@ public class Task {
                 "title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", id=" + id +
-                ", status='" + status + '\'' +
+                ", status=" + status +
+                ", taskType='" + taskType + '\'' +
                 '}';
     }
 
@@ -67,5 +69,13 @@ public class Task {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public TaskType getTaskType() {
+        return taskType;
+    }
+
+    public void setTaskType(TaskType taskType) {
+        this.taskType = taskType;
     }
 }
