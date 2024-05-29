@@ -27,19 +27,29 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         switch (task.getTaskType()) {
             case TASK:
             case EPIC:
-                taskString = Integer.toString(task.getId())
+                taskString = task.getId()
+                        + ","
                         + task.getTaskType()
+                        + ","
                         + task.getTitle()
+                        + ","
                         + task.getStatus()
+                        + ","
                         + task.getDescription();
                 return taskString;
             case SUBTASK:
-                taskString = Integer.toString(task.getId())
+                int id =((Subtask) task).getEpicId();
+                taskString = task.getId()
+                        + ","
                         + task.getTaskType()
+                        + ","
                         + task.getTitle()
+                        + ","
                         + task.getStatus()
+                        + ","
                         + task.getDescription()
-                        + ((Subtask) task).getEpicId();
+                        + ","
+                        + id;
                 return taskString;
             default:
                 throw new ManagerSaveException("Для форматирования в строку была передана задача" +
@@ -62,12 +72,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 FileWriter fileWriter = new FileWriter(fileToSave);
                 BufferedWriter bufferWriter = new BufferedWriter(fileWriter)
         ) {
-            bufferWriter.write("id,type,name,status,description,duration,epic\n");
+            bufferWriter.write("id,type,name,status,description,epic\n");
             for (Task task : allTask) {
                 try {
                     bufferWriter.write(taskInSpecialString(task) + "\n");
                 } catch (ManagerSaveException e) {
-                    System.out.println(e.getMessage());
+                    e.printStackTrace();
+
                 }
             }
         } catch (IOException e) {
@@ -112,7 +123,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
 
     /*
-    Метод реализует загрузку данных из файла и возвращает объект FileBackedTaskManager с задачами
+    Метод реализует загрузку данных из файла и возвращает объект FileBackedTaskManager
      */
     static FileBackedTaskManager loadFromFile(File file)
             throws IOException {
@@ -128,18 +139,90 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
 
             String[] taskLine = taskString.split("\n");
+            List<Task> loadedTasks = new ArrayList<>();
             for (int i = 1; i < taskLine.length; i++) {
                 Task task = fileBackedTaskManager.fromString(taskLine[i]);
-                switch (task.getTaskType()) {
-                    case TASK:
-
-                }
+                loadedTasks.add(task);
             }
+            fileBackedTaskManager.loadingTasks(loadedTasks);
+
         } catch (IOException e) {
-            System.out.println(e.getMessage());
-            return null;
+           e.printStackTrace();
+
         }
         return fileBackedTaskManager;
+
     }
+
+    @Override
+    public int createTask(Task task) {
+        int id = super.createTask(task);
+        save();
+        return id;
+    }
+
+    public int createEpic(Epic epic) {
+        int id = super.createEpic(epic);
+        save();
+        return id;
+    }
+
+    public Integer createSubtask(Subtask subtask) {
+        int id = super.createSubtask(subtask);
+        save();
+        return id;
+    }
+
+    public void updateTask(Task task) {
+        super.updateTask(task);
+        save();
+    }
+
+    public void updateSubtask(Subtask subtask) {
+        super.updateSubtask(subtask);
+        save();
+    }
+
+    // обновление эпика
+    public void updateEpic(Epic epic) {
+        super.updateEpic(epic);
+        save();
+    }
+
+    public void removeTask(int id) {
+        super.removeTask(id);
+        save();
+    }
+
+    public void removeEpic(int id) {
+        super.removeEpic(id);
+        save();
+    }
+
+    public void removeSubtask(int id) {
+        super.removeSubtask(id);
+        save();
+    }
+
+    public void deleteAllTask() {
+        super.deleteAllTask();
+        save();
+    }
+
+    public void deleteAllEpic() {
+        super.deleteAllEpic();
+        save();
+    }
+
+    public void deleteAllSubtask() {
+        super.deleteAllSubtask();
+        save();
+    }
+
+    public void clearAll() {
+        super.clearAll();
+        save();
+    }
+}
 
 

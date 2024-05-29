@@ -16,79 +16,79 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /*
-     * Получение из вне или создание новой задачи, с последующим сохранением в HashMap
+    Загрузка задач полученных из вне с присвоенными id
+     */
+    public void loadingTasks(List<Task> tasksToDistribute)
+            throws ClassCastException {
+        clearAll();
+        List<Subtask> subtaskBuffer = new ArrayList<>();
+        try {
+            for (Task task : tasksToDistribute) {
+                switch (task.getTaskType()) {
+                    case TASK:
+                        tasks.put(task.getId(), task);
+                        break;
+                    case EPIC:
+                        Epic e = (Epic) task;
+                        epics.put(task.getId(), e);
+                        break;
+                    case SUBTASK:
+                        subtaskBuffer.add((Subtask) task);
+                        break;
+                }
+            }
+        } catch (ClassCastException e){
+            System.out.println(e.getMessage());
+        }
+        for (Subtask subtask : subtaskBuffer){
+            subtasks.put(subtask.getId(),subtask);
+
+            Epic newEpic = epics.get(subtask.getEpicId());
+
+            newEpic.setSubtaskId(subtask.getId());
+            updateEpicStatus(newEpic.getId());
+        }
+    }
+
+    /*
+     * Получение из вне, присваивание Id и запись в HashMap
      */
     @Override
     public int createTask(Task task) {
-        int taskId;
-
-        if (task.getId() == -1) {
-            taskId = nexId++;
-            task.setId(taskId);
-            task.setTaskType(TaskType.TASK);
-            tasks.put(taskId, task);
-        } else {
-            taskId = task.getId();
-            if (taskId > nexId) {
-                nexId = task.getId() + 1;
-            }
-
-            tasks.put(task.getId(), task);
-        }
+        int taskId = nexId++;
+        task.setId(taskId);
+        task.setTaskType(TaskType.TASK);
+        tasks.put(taskId, task);
         return taskId;
     }
 
     @Override
     public int createEpic(Epic epic) {
-        int epicId;
-
-        if (epic.getId() == -1) {
-            epicId = nexId++;
-            epic.setId(epicId);
-            epic.setTaskType(TaskType.EPIC);
-            epics.put(epicId, epic);
-        } else {
-            epicId = epic.getId();
-            if (epicId > nexId) {
-                nexId = epicId + 1;
-            }
-
-            epics.put(epic.getId(), epic);
-        }
+        int epicId = nexId++;
+        epic.setId(epicId);
+        epic.setTaskType(TaskType.EPIC);
+        epics.put(epicId, epic);
         return epicId;
     }
 
     @Override
     public Integer createSubtask(Subtask subtask) {
-        int subtaskId;
-        if (subtask.getId() == -1) {
-            if (epics.containsKey(subtask.getEpicId())) {
-                subtaskId = nexId++;
-                subtask.setId(subtaskId);
-                subtask.setTaskType(TaskType.SUBTASK);
-                subtasks.put(subtaskId, subtask);
+        if (epics.containsKey(subtask.getEpicId())) {
+            int subtaskId = nexId++;
+            subtask.setId(subtaskId);
+            subtask.setTaskType(TaskType.SUBTASK);
+            subtasks.put(subtaskId, subtask);
 
-                Epic newEpic = epics.get(subtask.getEpicId());
-
-                newEpic.setSubtaskId(subtaskId);
-                updateEpicStatus(newEpic.getId());
-            } else {
-                System.out.println("Ошибка! Создание подзадчи без Большой задачи");
-                return null;
-            }
-        } else {
-            subtaskId = subtask.getId();
-            if(subtaskId>nexId){
-                nexId = subtaskId + 1;
-            }
-
-            subtasks.put(subtaskId,subtask);
             Epic newEpic = epics.get(subtask.getEpicId());
 
             newEpic.setSubtaskId(subtaskId);
             updateEpicStatus(newEpic.getId());
+            return subtaskId;
+        } else {
+            System.out.println("Ошибка! Создание подзадчи без Большой задачи");
+            return null;
         }
-        return subtaskId;
+
     }
 
     /*
