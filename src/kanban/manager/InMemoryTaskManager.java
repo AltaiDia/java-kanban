@@ -18,35 +18,53 @@ public class InMemoryTaskManager implements TaskManager {
     /*
     Загрузка задач полученных из вне с присвоенными id
      */
-    public void loadingTasks(List<Task> tasksToDistribute)
-            throws ClassCastException {
+    public void loadingTasks(List<Task> tasksToDistribute) {
         clearAll();
         List<Subtask> subtaskBuffer = new ArrayList<>();
-        try {
-            for (Task task : tasksToDistribute) {
-                switch (task.getTaskType()) {
-                    case TASK:
-                        tasks.put(task.getId(), task);
-                        break;
-                    case EPIC:
-                        Epic e = (Epic) task;
-                        epics.put(task.getId(), e);
-                        break;
-                    case SUBTASK:
-                        subtaskBuffer.add((Subtask) task);
-                        break;
-                }
+
+        for (Task task : tasksToDistribute) {
+            switch (task.getTaskType()) {
+                case TASK:
+                    tasks.put(task.getId(), task);
+                    break;
+                case EPIC:
+                    Epic e = (Epic) task;
+                    epics.put(task.getId(), e);
+                    break;
+                case SUBTASK:
+                    subtaskBuffer.add((Subtask) task);
+                    break;
             }
-        } catch (ClassCastException e){
-            System.out.println(e.getMessage());
+            if (task.getId() > nexId) {
+                nexId = task.getId() + 1;
+            }
         }
-        for (Subtask subtask : subtaskBuffer){
-            subtasks.put(subtask.getId(),subtask);
+
+        for (Subtask subtask : subtaskBuffer) {
+            subtasks.put(subtask.getId(), subtask);
 
             Epic newEpic = epics.get(subtask.getEpicId());
 
             newEpic.setSubtaskId(subtask.getId());
             updateEpicStatus(newEpic.getId());
+        }
+    }
+
+    /*
+    Загрузка истории просмотров из вне
+     */
+    public void loadingHistory(List<String> idHistory) {
+        historyManager.clearHistory();
+        for (String id : idHistory) {
+            if (tasks.containsKey(Integer.valueOf(id))) {
+                getTask(Integer.parseInt(id));
+            } else if (epics.containsKey(Integer.valueOf(id))) {
+                getEpic(Integer.parseInt(id));
+            } else if (subtasks.containsKey(Integer.valueOf(id))) {
+                getSubtask(Integer.parseInt(id));
+            } else {
+                System.out.println("Невозможно найти задачу по id для загрузки в историю просмотров");
+            }
         }
     }
 

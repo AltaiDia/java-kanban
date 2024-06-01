@@ -15,15 +15,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public FileBackedTaskManager(String fileToSave) {
         this.fileToSave = fileToSave;
+
     }
 
     /*
     Метод возвращает задачу в виде подготовленной строки
      */
-    String taskInSpecialString(Task task)
-            throws ManagerSaveException {
+    String taskInSpecialString(Task task) {
         String taskString;
-
         switch (task.getTaskType()) {
             case TASK:
             case EPIC:
@@ -38,7 +37,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                         + task.getDescription();
                 return taskString;
             case SUBTASK:
-                int id =((Subtask) task).getEpicId();
+                int id = ((Subtask) task).getEpicId();
                 taskString = task.getId()
                         + ","
                         + task.getTaskType()
@@ -55,7 +54,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 throw new ManagerSaveException("Для форматирования в строку была передана задача" +
                         " с неопределенным типом");
         }
+    }
 
+    /*
+    Метод возвращает историю просмотра задач в виде подготовленной строчки
+     */
+    String historiInSpecialString(List<Task> listHistory) {
+        StringBuilder stringHistory = new StringBuilder();
+        for (Task task : listHistory) {
+            stringHistory.append(task.getId());
+            stringHistory.append(",");
+        }
+        stringHistory.deleteCharAt(stringHistory.length() - 1);
+        return stringHistory.toString();
     }
 
     /*
@@ -72,25 +83,30 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 FileWriter fileWriter = new FileWriter(fileToSave);
                 BufferedWriter bufferWriter = new BufferedWriter(fileWriter)
         ) {
-            bufferWriter.write("id,type,name,status,description,epic\n");
-            for (Task task : allTask) {
-                try {
-                    bufferWriter.write(taskInSpecialString(task) + "\n");
-                } catch (ManagerSaveException e) {
-                    e.printStackTrace();
+            bufferWriter.write("id,type,name,status,description,epic");
+            bufferWriter.newLine();
 
-                }
+            for (Task task : allTask) {
+                bufferWriter.write(taskInSpecialString(task));
+                bufferWriter.newLine();
             }
-        } catch (IOException e) {
-            throw new ManagerSaveException("Ошибка при записи задач в файл");
+
+            bufferWriter.write("idHistory");
+            bufferWriter.newLine();
+            if (!historyManager.getHistory().isEmpty()) {
+                bufferWriter.write(historiInSpecialString(historyManager.getHistory()));
+            }
+        } catch (ManagerSaveException exception) {
+            System.out.println(exception.getMessage());
+        } catch (IOException exception) {
+            exception.printStackTrace();
         }
     }
 
     /*
     Метод преобразует строку в объект класса Task,Epic или Subtask
      */
-    Task fromString(String value)
-            throws ManagerSaveException {
+    Task fromString(String value) {
         String[] taskElements = value.split(",");
         Task task;
         switch (TaskType.valueOf(taskElements[1])) {
@@ -121,34 +137,56 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return task;
     }
 
+    /*
+    Метод преобразует строку в массив id просмотренных задач
+     */
+    String[] idHistoryFromString(String value) {
+        return value.split(",");
+    }
 
     /*
     Метод реализует загрузку данных из файла и возвращает объект FileBackedTaskManager
      */
-    static FileBackedTaskManager loadFromFile(File file)
-            throws IOException {
+    static FileBackedTaskManager loadFromFile(File file) throws IOException {
 
         Path path = file.toPath();
         FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(path.toString());
-        try {
-            String taskString = Files.readString(path, StandardCharsets.UTF_8);
 
-            if (taskString.isBlank()) {
+        try {
+            List<String> taskString = Files.readAllLines(path, StandardCharsets.UTF_8);
+
+            if (taskString.size() <= 1) {
                 System.out.println("Загружен пустой файл");
                 return fileBackedTaskManager;
             }
 
-            String[] taskLine = taskString.split("\n");
             List<Task> loadedTasks = new ArrayList<>();
-            for (int i = 1; i < taskLine.length; i++) {
-                Task task = fileBackedTaskManager.fromString(taskLine[i]);
-                loadedTasks.add(task);
+            List<String> idHistory = new ArrayList<>();
+
+            if (taskString.get(taskString.size() - 1).equals("idHistory")) {
+                for (int i = 1; i < taskString.size() - 1; i++) {
+                    Task task = fileBackedTaskManager.fromString(taskString.get(i));
+                    loadedTasks.add(task);
+                }
+                fileBackedTaskManager.loadingTasks(loadedTasks);
+            } else {
+                for (int i = 1; i < taskString.size(); i++) {
+                    if (i < (taskString.size() - 2)) {
+                        Task task = fileBackedTaskManager.fromString(taskString.get(i));
+                        loadedTasks.add(task);
+                    }
+                    if (i < (taskString.size())) {
+                        idHistory = List.of(fileBackedTaskManager.idHistoryFromString(taskString.get(i)));
+                    }
+                }
+                fileBackedTaskManager.loadingTasks(loadedTasks);
+                fileBackedTaskManager.loadingHistory(idHistory);
             }
-            fileBackedTaskManager.loadingTasks(loadedTasks);
 
-        } catch (IOException e) {
-           e.printStackTrace();
-
+        } catch (ManagerSaveException exception) {
+            System.out.println(exception.getMessage());
+        } catch (IOException exception) {
+            exception.printStackTrace();
         }
         return fileBackedTaskManager;
 
@@ -161,64 +199,97 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return id;
     }
 
+    @Override
     public int createEpic(Epic epic) {
         int id = super.createEpic(epic);
         save();
         return id;
     }
 
+    @Override
     public Integer createSubtask(Subtask subtask) {
         int id = super.createSubtask(subtask);
         save();
         return id;
     }
 
+    @Override
+    public Task getTask(int id) {
+        final Task task = super.getTask(id);
+        save();
+        return task;
+    }
+
+    @Override
+    public Epic getEpic(int id) {
+        final Epic epic = super.getEpic(id);
+        save();
+        return epic;
+    }
+
+    @Override
+    public Subtask getSubtask(int id) {
+        final Subtask subtask = super.getSubtask(id);
+        save();
+        return subtask;
+    }
+
+    @Override
     public void updateTask(Task task) {
         super.updateTask(task);
         save();
     }
 
+    @Override
     public void updateSubtask(Subtask subtask) {
         super.updateSubtask(subtask);
         save();
     }
 
+    @Override
     // обновление эпика
     public void updateEpic(Epic epic) {
         super.updateEpic(epic);
         save();
     }
 
+    @Override
     public void removeTask(int id) {
         super.removeTask(id);
         save();
     }
 
+    @Override
     public void removeEpic(int id) {
         super.removeEpic(id);
         save();
     }
 
+    @Override
     public void removeSubtask(int id) {
         super.removeSubtask(id);
         save();
     }
 
+    @Override
     public void deleteAllTask() {
         super.deleteAllTask();
         save();
     }
 
+    @Override
     public void deleteAllEpic() {
         super.deleteAllEpic();
         save();
     }
 
+    @Override
     public void deleteAllSubtask() {
         super.deleteAllSubtask();
         save();
     }
 
+    @Override
     public void clearAll() {
         super.clearAll();
         save();
