@@ -72,8 +72,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     /*
     Метод сохраняет задачи в файл
      */
-    void save()
-            throws ManagerSaveException {
+    void save() {
         List<Task> allTask = new ArrayList<>();
         allTask.addAll(getTasks());
         allTask.addAll(getEpics());
@@ -96,10 +95,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             if (!historyManager.getHistory().isEmpty()) {
                 bufferWriter.write(historiInSpecialString(historyManager.getHistory()));
             }
-        } catch (ManagerSaveException exception) {
-            System.out.println(exception.getMessage());
         } catch (IOException exception) {
-            exception.printStackTrace();
+            throw new ManagerSaveException("Ошибка при сохранении в файл: " + fileToSave);
         }
     }
 
@@ -183,10 +180,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 fileBackedTaskManager.loadingHistory(idHistory);
             }
 
-        } catch (ManagerSaveException exception) {
-            System.out.println(exception.getMessage());
         } catch (IOException exception) {
-            exception.printStackTrace();
+            throw new ManagerSaveException("Ошибка при загрузке файла" + file.getName());
         }
         return fileBackedTaskManager;
 

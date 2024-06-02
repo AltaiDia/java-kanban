@@ -100,6 +100,5 @@ class InMemoryHistoryManagerTest {
         actualTaskList = manager.getHistory();
         assertArrayEquals(new List[]{expectedTaskList}, new List[]{actualTaskList},
                 "Удаление первой задачи, не корректно");
-
     }
 }
