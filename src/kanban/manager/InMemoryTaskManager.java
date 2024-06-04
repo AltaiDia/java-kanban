@@ -1,9 +1,6 @@
 package kanban.manager;
 
-import kanban.task.Epic;
-import kanban.task.Status;
-import kanban.task.Subtask;
-import kanban.task.Task;
+import kanban.task.*;
 
 import java.util.*;
 
@@ -19,12 +16,66 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /*
+    Загрузка задач полученных из вне с присвоенными id
+     */
+    public void loadingTasks(List<Task> tasksToDistribute) {
+        clearAll();
+        List<Subtask> subtaskBuffer = new ArrayList<>();
+
+        for (Task task : tasksToDistribute) {
+            switch (task.getTaskType()) {
+                case TASK:
+                    tasks.put(task.getId(), task);
+                    break;
+                case EPIC:
+                    Epic e = (Epic) task;
+                    epics.put(task.getId(), e);
+                    break;
+                case SUBTASK:
+                    subtaskBuffer.add((Subtask) task);
+                    break;
+            }
+            if (task.getId() > nexId) {
+                nexId = task.getId() + 1;
+            }
+        }
+
+        for (Subtask subtask : subtaskBuffer) {
+            subtasks.put(subtask.getId(), subtask);
+
+            Epic newEpic = epics.get(subtask.getEpicId());
+
+            newEpic.setSubtaskId(subtask.getId());
+            updateEpicStatus(newEpic.getId());
+        }
+    }
+
+    /*
+    Загрузка истории просмотров из вне
+     */
+    public void loadingHistory(List<String> idHistory) {
+        historyManager.clearHistory();
+        for (String id : idHistory) {
+            if (tasks.containsKey(Integer.valueOf(id))) {
+                getTask(Integer.parseInt(id));
+            } else if (epics.containsKey(Integer.valueOf(id))) {
+                getEpic(Integer.parseInt(id));
+            } else if (subtasks.containsKey(Integer.valueOf(id))) {
+                getSubtask(Integer.parseInt(id));
+            } else {
+                System.out.println("Невозможно найти задачу по id для загрузки в историю просмотров");
+            }
+        }
+    }
+
+    /*
      * Получение из вне, присваивание Id и запись в HashMap
      */
     @Override
     public int createTask(Task task) {
         int taskId = nexId++;
         task.setId(taskId);
+        task.setTaskType(TaskType.TASK);
         tasks.put(taskId, task);
         return taskId;
     }
@@ -33,6 +84,7 @@ public class InMemoryTaskManager implements TaskManager {
     public int createEpic(Epic epic) {
         int epicId = nexId++;
         epic.setId(epicId);
+        epic.setTaskType(TaskType.EPIC);
         epics.put(epicId, epic);
         return epicId;
     }
@@ -42,6 +94,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (epics.containsKey(subtask.getEpicId())) {
             int subtaskId = nexId++;
             subtask.setId(subtaskId);
+            subtask.setTaskType(TaskType.SUBTASK);
             subtasks.put(subtaskId, subtask);
 
             Epic newEpic = epics.get(subtask.getEpicId());
