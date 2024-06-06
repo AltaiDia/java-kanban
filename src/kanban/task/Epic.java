@@ -1,16 +1,18 @@
 package kanban.task;
 
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class Epic extends Task {
     private final List<Integer> subtaskId;
+    private LocalDateTime endTime;
 
     public Epic(String title, String description, Status status) {
         super(title, description, status);
-        subtaskId = new ArrayList<>();
+        this.subtaskId = new ArrayList<>();
     }
 
     @Override
@@ -19,12 +21,13 @@ public class Epic extends Task {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Epic epic = (Epic) o;
-        return Objects.equals(subtaskId, epic.subtaskId);
+        return Objects.equals(subtaskId, epic.subtaskId)
+                && Objects.equals(endTime, epic.endTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), subtaskId);
+        return Objects.hash(super.hashCode(), subtaskId, endTime);
     }
 
     @Override
@@ -51,4 +54,17 @@ public class Epic extends Task {
         this.subtaskId.add(subtaskId);
     }
 
+    @Override
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    @Override
+    public String getEndTimeToString() {
+        return endTime.format(formatDateTime);
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
 }

@@ -1,5 +1,8 @@
 package kanban.task;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public class Task {
@@ -8,7 +11,25 @@ public class Task {
     protected int id = -1;
     protected Status status;
     protected TaskType taskType = null;
+    protected Duration executionDuration = null;
+    protected LocalDateTime startTime = null;
+    DateTimeFormatter formatDateTime = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm");
 
+    /*
+    Конструктор для объектов у которых время начала выполнения есть
+     */
+    public Task(String title, String description, Status status,
+                int executionDuration, LocalDateTime startTime) {
+        this.title = title;
+        this.description = description;
+        this.status = status;
+        this.executionDuration = Duration.ofMinutes(executionDuration);
+        this.startTime = startTime;
+    }
+
+    /*
+    Конструктор для объектов у которых нет времени начала выполнения
+    */
     public Task(String title, String description, Status status) {
         this.title = title;
         this.description = description;
@@ -20,12 +41,16 @@ public class Task {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
-        return id == task.id && Objects.equals(title, task.title) && Objects.equals(description, task.description) && Objects.equals(status, task.status);
+        return id == task.id
+                && Objects.equals(title, task.title)
+                && Objects.equals(description, task.description)
+                && status == task.status
+                && taskType == task.taskType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(title, description, id, status);
+        return Objects.hash(title, description, id, status, taskType);
     }
 
     @Override
@@ -36,6 +61,8 @@ public class Task {
                 ", id=" + id +
                 ", status=" + status +
                 ", taskType='" + taskType + '\'' +
+                ", duration ='" + executionDuration + '\'' +
+                ", startTime='" + startTime +
                 '}';
     }
 
@@ -77,5 +104,38 @@ public class Task {
 
     public void setTaskType(TaskType taskType) {
         this.taskType = taskType;
+    }
+
+    public Duration getExecutionDuration() {
+        return executionDuration;
+    }
+
+    public void setExecutionDuration(int executionDuration) {
+        this.executionDuration = Duration.ofMinutes(executionDuration);
+
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public String getStartTimeToString() {
+        if (startTime == null) {
+            return "null";
+        } else {
+            return startTime.format(formatDateTime);
+        }
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return startTime.plus(executionDuration);
+    }
+
+    public String getEndTimeToString() {
+        return startTime.plus(executionDuration).format(formatDateTime);
     }
 }
