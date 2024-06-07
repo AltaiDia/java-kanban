@@ -41,7 +41,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 Status.NEW, 65, LocalDateTime.now().plusHours(4), epic.getId());
         manager.createSubtask(subtask2);
         subtask3 = new Subtask("Подзадача № 3", "Описание Подзадачи № 3",
-                Status.NEW, 65, LocalDateTime.now().plusHours(6), epic.getId());
+                Status.NEW, epic.getId());
         manager.createSubtask(subtask3);
     }
 
@@ -121,6 +121,16 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         manager.updateEpic(epic);
         assertEquals(epic.getStatus(), Status.DONE, "Cтатус эпика не соотвествует ожидаемому " +
                 "- DONE");
+    }
+    @Test
+    public void epicDurationUpdate(){
+        assertEquals(epic.getStartTime(),subtask1.getStartTime(),"Время начала выполнения " +
+                "эпика не совпадает с временем самой ранней подзадачи");
+        assertEquals(epic.getEndTime(),subtask2.getEndTime(), "Время окончания выполнения " +
+                "эпика не совпадает со временем самой поздней подзадачи");
+        assertEquals(epic.getExecutionDuration(),subtask1.getExecutionDuration().
+                plus(subtask2.getExecutionDuration()), "Продолжительность выполнения эпика" +
+                " не совпадает со временем выполнения подзадач");
     }
 
     @Test

@@ -132,7 +132,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         task.setTaskType(TaskType.valueOf(taskElements[1]));
         task.setId(Integer.parseInt(taskElements[0]));
         if (!taskElements[6].equals("null")) {
-            task.setExecutionDuration((int) Duration.parse(taskElements[5]).toMinutes());
+            task.setExecutionDuration(Duration.parse(taskElements[5]).toMinutes());
             task.setStartTime(LocalDateTime.parse(taskElements[6]));
         }
         return task;
@@ -295,55 +295,3 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         save();
     }
 }
-/*
-    String taskInSpecialString(Task task) {
-        String taskString;
-        switch (task.getTaskType()) {
-            case TASK:
-            case EPIC:
-                if (task.getStartTime() != null) {
-                    return String.join(",",
-                            String.valueOf(task.getId()), // 0
-                            String.valueOf(task.getTaskType()), //1
-                            task.getTitle(), //2
-                            String.valueOf(task.getStatus()), //3
-                            task.getDescription(), //4
-                            String.valueOf(task.getStartTime()), //5
-                            String.valueOf(task.getExecutionDuration().toMinutes())); //6
-                } else {
-                    return String.join(",",
-                            String.valueOf(task.getId()), //0
-                            String.valueOf(task.getTaskType()), //1
-                            task.getTitle(), //2
-                            String.valueOf(task.getStatus()), //3
-                            task.getDescription()); //4
-                }
-            case SUBTASK:
-                int id = ((Subtask) task).getEpicId();
-                if (task.getStartTime() != null) {
-                    return String.join(",",
-                            String.valueOf(task.getId()), //0
-                            String.valueOf(task.getTaskType()), //1
-                            task.getTitle(), //2
-                            String.valueOf(task.getStatus()), //3
-                            task.getDescription(), //4
-                            String.valueOf(id), //5
-                            String.valueOf(task.getStartTime()), //6
-                            String.valueOf(task.getExecutionDuration().toMinutes())); //7
-
-
-                } else {
-                    return String.join(",",
-                            String.valueOf(task.getId()), //0
-                            String.valueOf(task.getTaskType()), //1
-                            task.getTitle(), //2
-                            String.valueOf(task.getStatus()), //3
-                            task.getDescription(), //4
-                            String.valueOf(id)); //5
-                }
-            default:
-                throw new ManagerSaveException("Для форматирования в строку была передана задача" +
-                        " с неопределенным типом");
-        }
-    }
-    */

@@ -110,7 +110,7 @@ public class Task {
         return executionDuration;
     }
 
-    public void setExecutionDuration(int executionDuration) {
+    public void setExecutionDuration(long executionDuration) {
         this.executionDuration = Duration.ofMinutes(executionDuration);
 
     }
