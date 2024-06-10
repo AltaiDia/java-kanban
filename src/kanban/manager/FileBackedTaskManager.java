@@ -7,6 +7,8 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,34 +24,30 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     Метод возвращает задачу в виде подготовленной строки
      */
     String taskInSpecialString(Task task) {
-        String taskString;
         switch (task.getTaskType()) {
             case TASK:
             case EPIC:
-                taskString = task.getId()
-                        + ","
-                        + task.getTaskType()
-                        + ","
-                        + task.getTitle()
-                        + ","
-                        + task.getStatus()
-                        + ","
-                        + task.getDescription();
-                return taskString;
+                return String.join(",",
+                        String.valueOf(task.getId()), // 0
+                        String.valueOf(task.getTaskType()), //1
+                        task.getTitle(), //2
+                        String.valueOf(task.getStatus()), //3
+                        task.getDescription(), //4
+                        String.valueOf(task.getExecutionDuration()), //5
+                        String.valueOf(task.getStartTime())); //6
+
             case SUBTASK:
                 int id = ((Subtask) task).getEpicId();
-                taskString = task.getId()
-                        + ","
-                        + task.getTaskType()
-                        + ","
-                        + task.getTitle()
-                        + ","
-                        + task.getStatus()
-                        + ","
-                        + task.getDescription()
-                        + ","
-                        + id;
-                return taskString;
+                return String.join(",",
+                        String.valueOf(task.getId()), //0
+                        String.valueOf(task.getTaskType()), //1
+                        task.getTitle(), //2
+                        String.valueOf(task.getStatus()), //3
+                        task.getDescription(), //4
+                        String.valueOf(task.getExecutionDuration()), //5
+                        String.valueOf(task.getStartTime()), //6
+                        String.valueOf(id)); //7
+
             default:
                 throw new ManagerSaveException("Для форматирования в строку была передана задача" +
                         " с неопределенным типом");
@@ -82,7 +80,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 FileWriter fileWriter = new FileWriter(fileToSave);
                 BufferedWriter bufferWriter = new BufferedWriter(fileWriter)
         ) {
-            bufferWriter.write("id,type,name,status,description,epic");
+            bufferWriter.write("id,type,name,status,description,duration,startTime,epic");
             bufferWriter.newLine();
 
             for (Task task : allTask) {
@@ -106,6 +104,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     Task fromString(String value) {
         String[] taskElements = value.split(",");
         Task task;
+
         switch (TaskType.valueOf(taskElements[1])) {
             case TASK:
                 task = new Task(
@@ -123,16 +122,22 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 task = new Subtask(taskElements[2],
                         taskElements[4],
                         Status.valueOf(taskElements[3]),
-                        Integer.parseInt(taskElements[5]));
+                        Integer.parseInt(taskElements[7]));
                 break;
             default:
                 throw new ManagerSaveException("Ошибка при преобразовании строки из файла,в задачу:" +
                         " в поток попала задача с неопределенным типом");
         }
+
         task.setTaskType(TaskType.valueOf(taskElements[1]));
         task.setId(Integer.parseInt(taskElements[0]));
+        if (!taskElements[6].equals("null")) {
+            task.setExecutionDuration(Duration.parse(taskElements[5]).toMinutes());
+            task.setStartTime(LocalDateTime.parse(taskElements[6]));
+        }
         return task;
     }
+
 
     /*
     Метод преобразует строку в массив id просмотренных задач
@@ -290,5 +295,3 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         save();
     }
 }
-
-
