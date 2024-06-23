@@ -15,19 +15,19 @@ public class Epic extends Task {
         this.subtaskId = new ArrayList<>();
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Epic epic = (Epic) o;
-        return Objects.equals(subtaskId, epic.subtaskId)
-                && Objects.equals(endTime, epic.endTime);
+        return Objects.equals(subtaskId, epic.subtaskId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), subtaskId, endTime);
+        return Objects.hash(super.hashCode(), subtaskId);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class Epic extends Task {
 
     @Override
     public String getEndTimeToString() {
-        return endTime.format(formatDateTime);
+        return endTime.format(DateTimeFormat.getFormatDateTime());
     }
 
     public void setEndTime(LocalDateTime endTime) {

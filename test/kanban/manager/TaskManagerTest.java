@@ -122,13 +122,14 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(epic.getStatus(), Status.DONE, "Cтатус эпика не соотвествует ожидаемому " +
                 "- DONE");
     }
+
     @Test
-    public void epicDurationUpdate(){
-        assertEquals(epic.getStartTime(),subtask1.getStartTime(),"Время начала выполнения " +
+    public void epicDurationUpdate() {
+        assertEquals(epic.getStartTime(), subtask1.getStartTime(), "Время начала выполнения " +
                 "эпика не совпадает с временем самой ранней подзадачи");
-        assertEquals(epic.getEndTime(),subtask2.getEndTime(), "Время окончания выполнения " +
+        assertEquals(epic.getEndTime(), subtask2.getEndTime(), "Время окончания выполнения " +
                 "эпика не совпадает со временем самой поздней подзадачи");
-        assertEquals(epic.getExecutionDuration(),subtask1.getExecutionDuration().
+        assertEquals(epic.getExecutionDuration(), subtask1.getExecutionDuration().
                 plus(subtask2.getExecutionDuration()), "Продолжительность выполнения эпика" +
                 " не совпадает со временем выполнения подзадач");
     }

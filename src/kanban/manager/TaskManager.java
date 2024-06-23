@@ -4,6 +4,7 @@ import kanban.task.Epic;
 import kanban.task.Subtask;
 import kanban.task.Task;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public interface TaskManager {
@@ -15,9 +16,9 @@ public interface TaskManager {
     Integer createSubtask(Subtask subtask);
 
     // Обновление статуса задач - получаем объект с уже присвоенным Id и перезаписываем
-    void updateTask(Task task);
+    int updateTask(Task task);
 
-    void updateSubtask(Subtask subtask);
+    int updateSubtask(Subtask subtask);
 
     // обновление эпика
     void updateEpic(Epic epic);
@@ -58,4 +59,5 @@ public interface TaskManager {
     //Получение списка просмотренных задач
     List<Task> getHistory();
 
+    List<Task> getPrioritizedTasks();
 }

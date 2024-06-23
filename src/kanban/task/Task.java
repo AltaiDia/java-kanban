@@ -13,7 +13,7 @@ public class Task {
     protected TaskType taskType = null;
     protected Duration executionDuration = null;
     protected LocalDateTime startTime = null;
-    DateTimeFormatter formatDateTime = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm");
+
 
     /*
     Конструктор для объектов у которых время начала выполнения есть
@@ -123,7 +123,7 @@ public class Task {
         if (startTime == null) {
             return "null";
         } else {
-            return startTime.format(formatDateTime);
+            return startTime.format(DateTimeFormat.getFormatDateTime());
         }
     }
 
@@ -136,6 +136,6 @@ public class Task {
     }
 
     public String getEndTimeToString() {
-        return startTime.plus(executionDuration).format(formatDateTime);
+        return startTime.plus(executionDuration).format(DateTimeFormat.getFormatDateTime());
     }
 }
