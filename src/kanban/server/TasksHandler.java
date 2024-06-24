@@ -2,7 +2,6 @@ package kanban.server;
 
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import kanban.manager.Manager;
 import kanban.manager.TaskManager;
 import kanban.task.Task;
@@ -12,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public class TasksHandler extends BaseHttpHandler implements HttpHandler {
+public class TasksHandler extends BaseHttpHandler {
     private final TaskManager manager;
     private final Gson gson;
 
@@ -21,29 +20,8 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
         gson = Manager.getGson();
     }
 
-    /*
-    Обработка запроса в зависимости от Http метода
-     */
     @Override
-    public void handle(HttpExchange httpExchange) throws IOException {
-        String method = httpExchange.getRequestMethod();
-
-        switch (method) {
-            case "GET":
-                tasksGet(httpExchange);
-                break;
-            case "POST":
-                tasksPost(httpExchange);
-                break;
-            case "DELETE":
-                tasksDelete(httpExchange);
-                break;
-            default:
-                sendBadRequest(httpExchange);
-        }
-    }
-
-    private void tasksGet(HttpExchange httpExchange) throws IOException {
+    protected void get(HttpExchange httpExchange) throws IOException {
         String path = httpExchange.getRequestURI().getPath();
         String response;
 
@@ -69,13 +47,12 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
         }
     }
 
-    private void tasksPost(HttpExchange httpExchange) throws IOException {
+    @Override
+    protected void post(HttpExchange httpExchange) throws IOException {
         String path = httpExchange.getRequestURI().getPath();
 
         if (Pattern.matches("^/tasks$", path)) {
             try {
-
-
                 String body = new String(httpExchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
                 Task taskRequest = gson.fromJson(body, Task.class);
                 int taskCreate = manager.createTask(taskRequest);
@@ -115,7 +92,8 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
         }
     }
 
-    private void tasksDelete(HttpExchange httpExchange) throws IOException {
+    @Override
+    protected void delete(HttpExchange httpExchange) throws IOException {
         String path = httpExchange.getRequestURI().getPath();
 
         if (Pattern.matches("^/tasks$", path)) {

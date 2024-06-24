@@ -2,7 +2,6 @@ package kanban.server;
 
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import kanban.manager.Manager;
 import kanban.manager.TaskManager;
 import kanban.task.Epic;
@@ -12,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
+public class EpicsHandler extends BaseHttpHandler {
     private final TaskManager manager;
     private final Gson gson;
 
@@ -22,25 +21,7 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
     }
 
     @Override
-    public void handle(HttpExchange httpExchange) throws IOException {
-        String method = httpExchange.getRequestMethod();
-
-        switch (method) {
-            case "GET":
-                epicsGet(httpExchange);
-                break;
-            case "POST":
-                epicsPost(httpExchange);
-                break;
-            case "DELETE":
-                epicsDelete(httpExchange);
-                break;
-            default:
-                sendBadRequest(httpExchange);
-        }
-    }
-
-    private void epicsGet(HttpExchange httpExchange) throws IOException {
+    protected void get(HttpExchange httpExchange) throws IOException {
         String path = httpExchange.getRequestURI().getPath();
         String response;
 
@@ -49,7 +30,6 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
             List<Epic> epics = manager.getEpics();
             response = gson.toJson(epics);
             sendText(httpExchange, response);
-
 
         } else if (Pattern.matches("^/epics/\\d+$", path)) {
             String pathId = path.replaceFirst("/epics/", "");
@@ -68,7 +48,8 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
         }
     }
 
-    private void epicsPost(HttpExchange httpExchange) throws IOException {
+    @Override
+    protected void post(HttpExchange httpExchange) throws IOException {
         String path = httpExchange.getRequestURI().getPath();
         if (Pattern.matches("^/epics$", path)) {
 
@@ -100,7 +81,8 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
         }
     }
 
-    private void epicsDelete(HttpExchange httpExchange) throws IOException {
+    @Override
+    protected void delete(HttpExchange httpExchange) throws IOException {
         String path = httpExchange.getRequestURI().getPath();
 
         if (Pattern.matches("^/epics$", path)) {

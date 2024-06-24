@@ -2,7 +2,6 @@ package kanban.server;
 
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import kanban.manager.Manager;
 import kanban.manager.TaskManager;
 import kanban.task.Subtask;
@@ -12,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
+public class SubtaskHandler extends BaseHttpHandler {
     private final TaskManager manager;
     private final Gson gson;
 
@@ -22,32 +21,16 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
     }
 
     @Override
-    public void handle(HttpExchange httpExchange) throws IOException {
-        String method = httpExchange.getRequestMethod();
-
-        switch (method) {
-            case "GET":
-                subtasksGet(httpExchange);
-                break;
-            case "POST":
-                subtasksPost(httpExchange);
-                break;
-            case "DELETE":
-                subtasksDelete(httpExchange);
-                break;
-            default:
-                sendBadRequest(httpExchange);
-        }
-    }
-
-    private void subtasksGet(HttpExchange httpExchange) throws IOException {
+    protected void get(HttpExchange httpExchange) throws IOException {
         String path = httpExchange.getRequestURI().getPath();
         String response;
 
         if (Pattern.matches("^/subtasks$", path)) {
+
             List<Subtask> subtasks = manager.getSubtasks();
             response = gson.toJson(subtasks);
             sendText(httpExchange, response);
+
         } else if (Pattern.matches("^/subtasks/\\d+$", path)) {
             String pathId = path.replaceFirst("/subtasks/", "");
             int id = parsePathId(pathId);
@@ -64,7 +47,8 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
         }
     }
 
-    private void subtasksPost(HttpExchange httpExchange) throws IOException {
+    @Override
+    protected void post(HttpExchange httpExchange) throws IOException {
         String path = httpExchange.getRequestURI().getPath();
         if (Pattern.matches("^/subtasks$", path)) {
 
@@ -102,7 +86,8 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
         }
     }
 
-    private void subtasksDelete(HttpExchange httpExchange) throws IOException {
+    @Override
+    protected void delete(HttpExchange httpExchange) throws IOException {
         String path = httpExchange.getRequestURI().getPath();
 
         if (Pattern.matches("^/subtasks$", path)) {
